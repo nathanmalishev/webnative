@@ -201,10 +201,6 @@ links = Object.entries(linksObject)
 data = await Promise.all(links.map(([name, _]) => {
   return fs.cat(`private/some/directory/path/${name}`)
 }))
-
-
-
-
 ```
 
 ---
@@ -261,8 +257,7 @@ const updatedCID = await wnfs.rm("private/some/path/to/a/file")
 
 **write**
 
-Write to a file at a given path.
-Overwrites existing content.
+Alias for `add`.
 
 Params:
 - path: `string` **required**
@@ -285,7 +280,7 @@ Yes, this only requires a slightly different setup.
 ```ts
 // UI thread
 // `session.fs` will now be `null`
-sdk.isAuthenticated({ loadFileSystem: false })
+sdk.initialise({ loadFileSystem: false })
 
 // Web Worker
 const fs = await sdk.loadFileSystem()
