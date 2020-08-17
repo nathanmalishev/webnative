@@ -1,5 +1,4 @@
 import { FileContent, CID, AddResult } from '../ipfs'
-import { Maybe } from '../common/types'
 
 
 // FILESYSTEM
@@ -28,8 +27,7 @@ export interface File {
 }
 
 export interface HeaderFile extends File {
-  parentKey: Maybe<string>
-  getHeader(): HeaderV1
+  metadata: Metadata
   putDetailed(): Promise<PutDetails>
 }
 
@@ -62,36 +60,27 @@ export type Metadata = {
   version: SemVer
 }
 
-export type Children = { [name: string]: Metadata }
-
-export type HeaderV1 = {
-  name: string
-  isFile: boolean
-  mtime: number
-  ctime: number
-  version: SemVer
-  size: number
-  key: Maybe<string>
-  skeleton: Skeleton
-  children: Children
-}
+export type ChildrenMetadata = { [name: string]: Metadata }
 
 export type SkeletonInfo = {
   cid: CID
   userland: CID
   metadata: CID
   children: Skeleton
-  key: Maybe<string>
 }
 
 export type Skeleton = { [name: string]: SkeletonInfo }
 
-export type IpfsSerialized = {
+export type TreeInfo = {
   metadata: Metadata
   skeleton: Skeleton
-  children: Children
+  children: ChildrenMetadata
   userland: CID
-  key: Maybe<string>
+}
+
+export type FileInfo = {
+  metadata: Metadata
+  userland: CID
 }
 
 // MISC
@@ -114,26 +103,6 @@ export type SemVer = {
   patch: number
 }
 
-// STATIC METHODS
-// ----
-
-export interface TreeStatic {
-  empty (parentKey: Maybe<string>): Promise<HeaderTree>
-  fromCID (cid: CID, parentKey: Maybe<string>): Promise<HeaderTree>
-  fromHeaderAndUserland(header: HeaderV1, userland: CID, parentKey: Maybe<string>): Promise<HeaderTree>
-}
-
-export interface FileStatic {
-  create(content: FileContent, parentKey: Maybe<string>): Promise<HeaderFile>
-  fromCID(cid: CID, parentKey: Maybe<string>): Promise<HeaderFile>
-  fromHeaderAndUserland(header: HeaderV1, userland: CID, parentKey: Maybe<string>): Promise<HeaderFile>
-}
-
-export interface StaticMethods {
-  tree: TreeStatic
-  file: FileStatic
-}
-
 // TREE
 // ----
 
@@ -143,7 +112,6 @@ export interface UnixTree {
   cat(path: string): Promise<FileContent>
   add(path: string, content: FileContent): Promise<this>
   rm(path: string): Promise<this>
-  // get(path: string): Promise<this | FileContent | null>
   exists(path: string): Promise<boolean>
 }
 
@@ -174,8 +142,9 @@ export interface Tree {
 }
 
 export interface HeaderTree extends Tree {
-  parentKey: Maybe<string>
-  getHeader(): HeaderV1
+  skeleton: Skeleton
+  metadata: Metadata
+
   putDetailed(): Promise<PutDetails>
 }
 
